@@ -1,0 +1,45 @@
+mpsk-logic {
+        map json "%rest(https://pocket.i.mustard.ovh/api/collections/psk/records/?filter=%28DeviceMac%3D%27%{User-Name}%27%29)" {
+        &Tmp-Integer-0 = '$.totalItems'
+        &Tmp-String-0 = '$.items[0].Psk'
+  }
+
+    if (&Tmp-Integer-0 == 1){
+        update reply{
+                &Tunnel-Type = VLAN
+                &Tunnel-Medium-Type = IEEE-802
+                &Vendor-Specific.Aruba.MPSK-Passphrase = &Tmp-String-0
+                }
+        update control {
+                &Auth-Type = Accept
+        }
+    } else {
+        update control{
+                &Auth-Type = Reject
+        }
+    }
+}
+
+    ## TmpInteger is the number of values returned from API
+    ## IF mac is present this will be 1
+    # if (control:Tmp-Integer-3 == 1) {
+
+    #    update reply {
+    #        #Tunnel-Private-Group-Id := "%{sql:SELECT vlan_id FROM macauth WHERE mac='%{User-Name}'}"
+    #        Tunnel-Type := VLAN
+    #        Tunnel-Medium-Type := IEEE-802
+
+    #        ##
+    #        # Tunnel-Private-Group-Id and Aruba-MPSK-Passphrase are set by the REST module
+
+    #      }
+    #     update {
+    #         control:Auth-Type := Accept
+    #      }
+    #  }
+    #  else {
+    #     update request {
+    #         Tmp-String-2 := "M2V|Mac Address not in Database"
+    #     }
+    #     reject
+    #  }

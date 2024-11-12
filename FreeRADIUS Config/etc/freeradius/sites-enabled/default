@@ -1,0 +1,26 @@
+server mpsk {
+    namespace = radius # FreeRADIUS 4 - Must provide a namespace so server knows its going to be accepting RADIUS
+
+    listen {
+        type = Access-Request
+        transport = udp
+        udp {
+            ipaddr = *
+            port = 1812
+        }
+    }
+
+    recv Access-Request {
+        session{
+        max = 4096
+        }
+
+
+    update control {
+     &REST-HTTP-Header := "Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjI0NjQ2NzYsImlkIjoiOTN6bzkweDBqbmYwazI4IiwidHlwZSI6ImFkbWluIn0.MLDFlgYu71MCv_yb63gppzg5MiqDl_oiWFKc1XJSRT0"
+   }
+
+
+    mpsk-logic
+        }
+}
