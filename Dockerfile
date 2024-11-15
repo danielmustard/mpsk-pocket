@@ -1,5 +1,7 @@
 FROM debian:bookworm
 
+## podman-compose build --no-cache --pull
+
 # Install prerequisites
 RUN apt-get update && apt-get install -y curl gnupg
 
@@ -31,32 +33,33 @@ RUN apt-get update && \
 # Clean up APT cache to reduce image size
 RUN rm -rf /var/lib/apt/lists/*
 
-# Copy and set permissions on the modules
-#COPY ./mods-available /etc/freeradius/mods-available/
 
-##COPY ./mods-config /etc/freeradius/mods-config
-#
-#COPY ./mods-enabled /etc/freeradius/mods-enabled/
-#
-#COPY ./policy.d /etc/freeradius/policy.d/
-#
-#COPY ./sites-available /etc/freeradius/sites-available/
-#
-##COPY ./sites-available/default /etc/freeradius/sites-available/default
-
-
-## Copy Clients.conf
-
-COPY ./FreeRADIUS-Config/etc/freeradius/clients.conf /etc/freeradius/clients.conf
-
-# Set the correct permissions on all relevant files and folders
-RUN chmod 644 /etc/freeradius/* \
-    && chmod -R o-w /etc/freeradius/* \
-    && chmod -R o-w /etc/freeradius/clients.conf \
-    && chown -R root:freerad /etc/freeradius/*
 
 # Enable the REST module by linking
-#RUN ln -s /etc/freeradius/mods-available/rest /etc/freeradius/mods-enabled/rest
+RUN ln -s /etc/freeradius/mods-available/rest /etc/freeradius/mods-enabled/rest
+
+# Enable the JSON module by linking
+RUN ln -s /etc/freeradius/mods-available/json /etc/freeradius/mods-enabled/json
+
+## Copy Clients.conf
+COPY ./FreeRADIUS-Config/etc/freeradius/clients.conf /etc/freeradius/clients.conf
+
+## Copy Policy.d
+COPY ./FreeRADIUS-Config/etc/freeradius/policy.d/mpsk-logic /etc/freeradius/policy.d/mpsk-logic
+
+## Copy Sites-available
+COPY ./FreeRADIUS-Config/etc/freeradius/sites-enabled/default /etc/freeradius/sites-enabled/default
+
+## Set permissions
+RUN chmod -R go-w /etc/freeradius/
+
+# Set the correct permissions on all relevant files and folders
+#RUN chmod 644 /etc/freeradius/* \
+#    && chmod -R o-w /etc/freeradius/* \
+#    && chmod -R o-w /etc/freeradius/clients.conf \
+#    && chown -R root:freerad /etc/freeradius/*
+
+
 
 # Final step: confirm no global write permissions on the link
 #RUN chmod 644 /etc/freeradius/mods-enabled/rest
